@@ -21,8 +21,6 @@ model = api.model('User', {
 
 @web.route('/signup')
 class SignupApi(Resource):
-    def get(self):
-        return 'something'
     @api.marshal_with(model)
     @api.expect(model, validate=True)
     @api.doc(responses={
