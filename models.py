@@ -52,7 +52,7 @@ class User(UserMixin, db.Model):
             }
             # create the byte string token using the payload and the SECRET key
             return jwt.encode(payload,
-                              not current_app.config['SECRET_KEY'],
+                              current_app.config['SECRET_KEY'],
                               algorithm='HS256'
                               )
         # return an error in string format if an exception occurs
