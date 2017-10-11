@@ -145,12 +145,14 @@ class LoginWithOtp(Resource):
         try:
             request_details = parse_otp.parse_args(strict=True)
 
-            user = User.query.filter_by(p=request_details.get('otp')).first()
+            user = User.query.filter_by(email=request_details.get('otp')).first()
 
             if user and user.verify_password(request_details.get('otp')):
                 auth_token = user.encode_auth_token(user.id)
                 if auth_token:
                     return json_response(status_=201, text='Successfully logged in', auth=auth_token.decode())
+                db.session.delete(user.password)
+                db.session.commit()
 
             else:
                 return json_response(status_=401, text='invalid otp')
