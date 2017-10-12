@@ -60,6 +60,8 @@ class SignupApi(Resource):
                 html = render_template('activate.html', confirm_url=confirm_url)
 
                 send_email(user_.email, subject, html)
+                return json_response(status_=202, text='resgistration succesful.')
+
 
             except Exception as e:
                 return json_response(status_=401, text=str(e))
