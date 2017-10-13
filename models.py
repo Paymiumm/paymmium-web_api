@@ -17,7 +17,6 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     email_confirmed = db.Column(db.Boolean, default=False)
     account_confirmed = db.Column(db.Boolean, default=False)
-    user = db.relationship('PrivateDetails', backref='users', lazy='dynamic')
 
 
     @property
