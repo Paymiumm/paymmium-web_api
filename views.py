@@ -104,7 +104,7 @@ user_login_email = api.model('User', {
 })
 
 
-@main.route('/login-with-email')
+@api.route('/login-with-email')
 @api.doc(param={
     'email': 'An email'
 })
@@ -153,7 +153,7 @@ user_login_otp = api.model('User',
                            })
 
 
-@main.route('/login-with otp')
+@api.route('/login-with otp')
 @api.doc(params={
     'otp': 'one-time-pass',
     'email': 'user email'
