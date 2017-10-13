@@ -16,10 +16,15 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
     json.init_app(app)
-    api.init_app(app)
+
+    from app.views import auth_blueprint as auth
+    api.init_app(auth)
+
+    app.register_blueprint(auth, url_prefix='/auth')
 
 
     from app import views
+
 
     with app.app_context():
         db.create_all()
