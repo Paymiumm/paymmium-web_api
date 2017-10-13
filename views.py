@@ -2,7 +2,7 @@ from app.models import User
 from flask_json import json_response
 from app import db
 from flask_restplus import Resource, reqparse, fields, inputs
-from app import api
+from app import api, json
 from sqlalchemy.exc import IntegrityError
 from flask import render_template
 from app.security import generate_confirmation_token, confirm_token
@@ -12,6 +12,15 @@ from flask import current_app
 from flask import Blueprint
 
 auth_blueprint = Blueprint('auth', __name__)
+
+
+@json.invalid_json_error
+def invalid_json():
+    return json_response(status_=400, description='Not a Json')
+
+@json.error_handler
+def error_handler(e):
+    return json_response(status_=401, description='An error occured')
 
 def send_sms(to_number, body):
     """This function is to send_sms using twillio"""
@@ -57,7 +66,7 @@ class RegisterUserApi(Resource):
                 db.session.commit()
 
                 token = generate_confirmation_token(user.email)
-                confirm_url = api.url_for(ConfirmEmail, token=token, _external=True)
+                confirm_url = api.url_for(ConfirmEmailApi, token=token, _external=True)
                 subject = 'Please confirm your email'
                 html = render_template('activate.html', confirm_url=confirm_url)
 
@@ -76,7 +85,7 @@ class RegisterUserApi(Resource):
 
 
 @api.route('/confirm-email/<token>')
-class ConfirmEmail(Resource):
+class ConfirmEmailApi(Resource):
     def get(self, token):
         try:
             email = confirm_token(token)
@@ -108,7 +117,7 @@ user_login_email = api.model('User', {
 @api.doc(param={
     'email': 'An email'
 })
-class LoginWithEmail(Resource):
+class LoginWithEmailApi(Resource):
     def get(self):
         pass
 
@@ -158,7 +167,7 @@ user_login_otp = api.model('User',
     'otp': 'one-time-pass',
     'email': 'user email'
 })
-class LoginWithOtp(Resource):
+class LoginWithOtpApi(Resource):
     def get(self):
         pass
 
