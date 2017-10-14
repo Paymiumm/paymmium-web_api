@@ -1,10 +1,9 @@
 from flask_testing import TestCase
 from flask import Flask
-from app.models import db
+from app.models import db, User
 import unittest
 import json
 from config import Testing
-
 
 
 class MyTest(TestCase):
@@ -17,28 +16,29 @@ class MyTest(TestCase):
     def setUp(self):
         db.create_all()
 
-    def test_registration(self):
-        """ Test for user registration """
-        with self.client:
-            response = self.client.post('/main/register',
-            data=json.dumps(dict(
-                full_name='joe@gmail.com',
-                username='123456',
-                email='something@example.com'
-            )),
-            content_type='application/json'
-        )
-        data = json.loads(response.data.decode())
-        self.assertTrue(data['status'] == 'success')
-        self.assertTrue(data['message'] == 'Successfully registered.')
-        self.assertTrue(data['auth_token'])
-        self.assertTrue(response.content_type == 'application/json')
-        self.assertEqual(response.status_code, 201)
+    def test_encode_token(self):
+        user = User(full_name='something', username='emma', email='s@gmail.com',  password='ksks')
+        db.session.add(user)
+        db.session.commit()
+        auth_token = user.encode_auth_token(user.id)
+        self.assertTrue(isinstance(auth_token, str))
+
+    def test_decode_token(self):
+        user_details = User(full_name='mr jones', username='hit me', email='emmanuel@gmail',  password='something ')
+        db.session.add(user_details)
+        db.session.commit()
+        auth_token = user_details.encode_auth_token(user_details.id)
+        self.assertTrue(isinstance(auth_token, str))
+        self.assertTrue(User.decode_token(auth_token == 1))
+
+
+    def test_token(self):
+        pass
+
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-
 
 
 
