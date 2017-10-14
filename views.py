@@ -1,15 +1,13 @@
-from app.models import User
+from app.models import User, BlackListToken
 from flask_json import json_response
 from app import db
 from flask_restplus import Resource, reqparse, fields, inputs
 from app import api, json
 from sqlalchemy.exc import IntegrityError
-from flask import render_template
+from flask import render_template, request, Blueprint, current_app
 from app.security import generate_confirmation_token, confirm_token
 from app.email import send_email
 from twilio.rest import Client
-from flask import current_app
-from flask import Blueprint
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -194,3 +192,33 @@ class LoginWithOtpApi(Resource):
 
         except Exception as e:
             return json_response(status_=401, text='Failed', type=str(e))
+
+@api.route('/logout')
+class LogoutApi(Resource):
+    def post(self):
+
+        auth_headers = request.headers.get('Authorization')
+
+        if auth_headers:
+            auth_token = auth_headers.split('')[1]
+        else:
+            auth_token = ''
+
+        if auth_token:
+            resp = User.decode_token(auth_token)
+            if not isinstance(resp, str):
+                # mark the token as blacklisted
+                black_list_token =  BlackListToken(token=auth_token)
+
+                try:
+                    db.session.add(black_list_token)
+                    db.session.commit()
+                    return json_response(status_=201, text='Successfully  logged out ')
+                except Exception as e:
+                    return json_response(status_=201, text='Failed')
+
+            else:
+                return json_response(status_=401, text=resp)
+        else:
+            return json_response(status_=403, text='Please provide a valid token')
+
